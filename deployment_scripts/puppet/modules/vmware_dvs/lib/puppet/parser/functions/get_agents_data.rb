@@ -6,6 +6,7 @@
              ) do |args|
     raise(Puppet::ParseError, 'Shoud have 5 arguments!') if args.size < 4 or args[0] == ""
     vcenter = args[0]['computes']
+    puts args[1].inspect
     physnet = args[1]["predefined_networks"]["admin_internal_net"]["L2"]["physnet"]
     use_fw_driver = args[2]["vmware_dvs_fw_driver"]
     current_node = args[3].split(".")[0]

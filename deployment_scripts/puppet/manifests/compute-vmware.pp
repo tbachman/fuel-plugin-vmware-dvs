@@ -20,11 +20,15 @@ $nova_hash          = hiera_hash('nova')
 $management_vip     = hiera('management_vip')
 $service_endpoint   = hiera('service_endpoint', $management_vip)
 $neutron_endpoint   = hiera('neutron_endpoint', $management_vip)
-$admin_password     = try_get_value($neutron_config, 'keystone/admin_password')
-$admin_tenant_name  = try_get_value($neutron_config,
-                                  'keystone/admin_tenant', 'services')
-$admin_username     = try_get_value($neutron_config,
-                                  'keystone/admin_user', 'neutron')
+#$admin_password     = try_get_value($neutron_config, 'keystone/admin_password')
+#$admin_tenant_name  = try_get_value($neutron_config,
+#                                  'keystone/admin_tenant', 'services')
+#$admin_username     = try_get_value($neutron_config,
+#                                  'keystone/admin_user', 'neutron')
+$admin_password     = pick($neutron_config['keystone/admin_password'],'admin')
+$admin_tenant_name  = pick($neutron_config['keystone/admin_tenant'],'services')
+$admin_username     = pick($neutron_config['keystone/admin_user'],'neutron')
+
 $region_name        = hiera('region', 'RegionOne')
 $auth_api_version   = 'v2.0'
 $admin_identity_uri = "http://${service_endpoint}:35357"
