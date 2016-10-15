@@ -1,23 +1,31 @@
 diff --git a/nova/virt/vmwareapi/vif.py b/nova/virt/vmwareapi/vif.py
-index 3d228d7..d513a74 100644
+index 660e641..d19fd29 100644
 --- a/nova/virt/vmwareapi/vif.py
 +++ b/nova/virt/vmwareapi/vif.py
-@@ -155,6 +155,10 @@ def get_network_ref(session, cluster, vif, is_neutron):
-         network_name = (vif['network']['bridge'] or
-                         CONF.vmware.integration_bridge)
+@@ -153,9 +153,16 @@ def get_neutron_network(session, network_name, cluster, vif):
+
+ def get_network_ref(session, cluster, vif, is_neutron):
+     if is_neutron:
+-        network_name = (vif['network']['bridge'] or
+-                        CONF.vmware.integration_bridge)
++        network_name = vif.get('details', {}).get('dvs_port_group_name')
++        if network_name is None:
++            network_name = (vif['network']['bridge'] or
++                            CONF.vmware.integration_bridge)
          network_ref = get_neutron_network(session, network_name, cluster, vif)
 +        try:
 +            network_ref['dvs_port_key']=vif['details']['dvs_port_key']
 +        except KeyError:
 +            pass
++
      else:
          create_vlan = vif['network'].get_meta('should_create_vlan', False)
          network_ref = ensure_vlan_bridge(session, vif, cluster=cluster,
 diff --git a/nova/virt/vmwareapi/vm_util.py b/nova/virt/vmwareapi/vm_util.py
-index bbf2835..be68010 100644
+index bf0782f..9f976a3 100644
 --- a/nova/virt/vmwareapi/vm_util.py
 +++ b/nova/virt/vmwareapi/vm_util.py
-@@ -339,6 +339,10 @@ def _create_vif_spec(client_factory, vif_info):
+@@ -437,6 +437,10 @@ def _create_vif_spec(client_factory, vif_info):
                      'ns0:DistributedVirtualSwitchPortConnection')
          portgroup.switchUuid = network_ref['dvsw']
          portgroup.portgroupKey = network_ref['dvpg']
@@ -28,3 +36,4 @@ index bbf2835..be68010 100644
          backing.port = portgroup
      else:
          backing = client_factory.create(
+
